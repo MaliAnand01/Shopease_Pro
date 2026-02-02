@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #000000;
+  --color-surface: #ffffff;
+  --color-contrast: #000000;
+  --color-muted: #666666;
+  
+  --font-sans: 'Inter', 'Outfit', system-ui, sans-serif;
+  
+  --radius-premium: 2rem;
+  --radius-button: 1rem;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --color-bg-light: #ffffff;
+    --color-text-light: #000000;
+    --color-bg-dark: #000000;
+    --color-text-dark: #ffffff;
+  }
+
+  body {
+    @apply bg-white text-black transition-colors duration-500 antialiased font-sans;
+  }
+  
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Force dark mode background/text when .dark class is present */
+  .dark body {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  /* Selection styling - Sharp & High Contrast */
+  ::selection {
+    @apply bg-black text-white dark:bg-white dark:text-black;
+  }
+
+  /* Minimal scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-1;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-black dark:bg-white rounded-full;
+  }
+}
+
+@layer utilities {
+  /* Simple solid navbar */
+  .premium-nav {
+    @apply bg-white dark:bg-black border-b border-black dark:border-white transition-all duration-300;
+  }
+
+  /* Standard premium button with fill animation */
+  .btn-premium {
+    @apply relative px-8 py-3 rounded-2xl border border-black dark:border-white 
+           bg-white dark:bg-black text-black dark:text-white
+           font-bold uppercase tracking-widest text-[11px]
+           transition-all duration-500 overflow-hidden z-1;
+  }
+  
+  .btn-premium::before {
+    content: '';
+    @apply absolute top-0 left-0 w-0 h-full bg-black dark:bg-white -z-1 transition-all duration-500 ease-out;
+  }
+  
+  .btn-premium:hover::before {
+    @apply w-full;
+  }
+  
+  .btn-premium:hover {
+    @apply text-white dark:text-black;
+  }
+
+  .btn-premium:active {
+    @apply scale-95 opacity-80;
+  }
+
+  /* Outline variant */
+  .btn-outline {
+    @apply px-8 py-3 rounded-2xl border border-black dark:border-white 
+           bg-transparent text-black dark:text-white
+           font-bold uppercase tracking-widest text-[11px]
+           transition-all duration-300 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black;
+  }
+
+  /* Solid card container with Neobrutalism shadow */
+  .premium-card {
+    @apply rounded-[2rem] overflow-hidden border border-black dark:border-white 
+           bg-white dark:bg-black transition-all duration-500;
+  }
+  
+  .card-hover-shadow {
+    @apply hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[12px_12px_0px_0px_rgba(255,255,255,1)]
+           hover:-translate-x-1 hover:-translate-y-1;
+  }
+
+  .premium-shadow {
+    @apply shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)];
+  }
+}
