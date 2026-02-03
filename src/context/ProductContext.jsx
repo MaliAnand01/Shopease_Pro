@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 // src/context/ProductContext.jsx
 import { createContext, useReducer, useEffect } from "react";
-import axios from "axios";
+import { supabase } from "../lib/supabaseClient";
 
 export const ProductContext = createContext();
 
@@ -35,12 +35,21 @@ export const ProductProvider = ({ children }) => {
     const fetchProducts = async () => {
       dispatch({ type: "FETCH_START" });
       try {
-        const url = state.searchQuery
-          ? `https://dummyjson.com/products/search?q=${state.searchQuery}`
-          : "https://dummyjson.com/products";
-        const response = await axios.get(url);
-        dispatch({ type: "FETCH_SUCCESS", payload: response.data.products });
+        let query = supabase.from('products').select('*');
+        
+        if (state.searchQuery) {
+          const q = state.searchQuery;
+          // Search in title, description, category, and brand
+          query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,category.ilike.%${q}%,brand.ilike.%${q}%`);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error) throw error;
+        
+        dispatch({ type: "FETCH_SUCCESS", payload: data });
       } catch (err) {
+        console.error("Error fetching products:", err);
         dispatch({ type: "FETCH_ERROR", payload: err.message });
       }
     };

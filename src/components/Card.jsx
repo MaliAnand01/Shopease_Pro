@@ -5,6 +5,7 @@ import { CartContext } from "../context/CartContext";
 import { ThemeContext } from "../context/ThemeContext";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
+import LazyImage from "./ui/LazyImage";
 
 const Card = ({
   image,
@@ -42,10 +43,10 @@ const Card = ({
     >
       {/* Image Container */}
       <Link to={`/product/${pId}`} className="relative aspect-square w-full overflow-hidden bg-transparent border-b-2 border-black dark:border-white">
-        <img
+        <LazyImage
           src={image}
           alt={title}
-          className="h-full w-full object-contain p-10 transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-105"
+          className="p-10 transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-105"
         />
         
         {/* Top Tag */}

@@ -8,6 +8,7 @@ import { AuthContext } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import Skeleton from "../components/ui/Skeleton";
+import LazyImage from "../components/ui/LazyImage";
 
 const Product = () => {
   const [product, setProduct] = useState({});
@@ -70,15 +71,13 @@ const Product = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className={`aspect-square w-full flex items-center justify-center p-12 rounded-[3rem] overflow-hidden bg-white dark:bg-black border-2 border-black dark:border-white shadow-2xl`}
+            className={`aspect-square w-full flex items-center justify-center p-12 rounded-[3rem] overflow-hidden bg-white dark:bg-black border-2 border-black dark:border-white shadow-2xl relative`}
           >
-            <motion.img
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.3 }}
+            <LazyImage
               src={product.images?.[0] || product.thumbnail}
               alt={product.title}
-              className="w-full h-full object-contain"
+              className="w-full h-full"
+              containerClassName="w-full h-full"
             />
           </motion.div>
 

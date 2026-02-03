@@ -5,8 +5,62 @@ import logo from "../assets/logo.png";
 import { CartContext } from "../context/CartContext";
 import { ThemeContext } from "../context/ThemeContext";
 import { AuthContext } from "../context/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import AuthModal from "./AuthModal";
+
+// Kinetic Magnetic Link Component
+const KineticLink = ({ to, children, end }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
+  const mouseY = useSpring(y, { stiffness: 150, damping: 15 });
+
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    x.set((e.clientX - centerX) * 0.4);
+    y.set((e.clientY - centerY) * 0.4);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <NavLink to={to} end={end} className="relative group">
+      {({ isActive: linkActive }) => (
+        <motion.div
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{ x: mouseX, y: mouseY }}
+          className="relative z-10 flex items-center justify-center h-full cursor-pointer px-8 py-3"
+        >
+          <span className={`relative z-20 text-[10px] font-black uppercase tracking-[0.4em] transition-colors duration-300 ${
+            linkActive ? "text-white dark:text-black" : "text-black dark:text-white opacity-40 group-hover:opacity-100"
+          }`}>
+            {children}
+          </span>
+          
+          {linkActive && (
+            <motion.div
+              layoutId="nav-pill"
+              className="absolute inset-0 bg-black dark:bg-white rounded-full z-10"
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            />
+          )}
+
+          {/* Hover highlight (ghost pill) */}
+          <motion.div
+            className="absolute inset-0 bg-black/5 dark:bg-white/5 rounded-full z-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            transition={{ duration: 0.2 }}
+          />
+        </motion.div>
+      )}
+    </NavLink>
+  );
+};
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -44,7 +98,7 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: "Home", path: "/" },
+    { name: "Home", path: "/", end: true },
     { name: "Contact", path: "/contact" },
     { name: "About", path: "/about" },
   ];
@@ -52,7 +106,7 @@ const Navbar = () => {
   // Admin Links
   if (user?.role === "admin") {
     navLinks.push(
-      { name: "Dashboard", path: "/admin" },
+      { name: "Dashboard", path: "/admin", end: true },
       { name: "Orders", path: "/admin/orders" }
     );
   }
@@ -60,8 +114,8 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-white dark:bg-black border-b-2 border-black dark:border-white ${
-          isScrolled ? "py-2" : "py-5"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b-2 border-black dark:border-white ${
+          isScrolled ? "py-3" : "py-6"
         }`}
       >
         <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center">
@@ -75,20 +129,12 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-12">
-            <div className="flex items-center gap-10">
+          <div className="hidden xl:flex items-center gap-12">
+            <div className="flex items-center gap-4">
               {navLinks.map((link) => (
-                <NavLink
-                  key={link.name}
-                  to={link.path}
-                  className={({ isActive }) =>
-                    `text-[10px] font-black uppercase tracking-[0.3em] transition-all hover:opacity-100 ${
-                      isActive ? "opacity-100" : "opacity-40"
-                    }`
-                  }
-                >
-                  {link.name}
-                </NavLink>
+                <KineticLink key={link.name} to={link.path} end={link.end}>
+                    {link.name}
+                </KineticLink>
               ))}
             </div>
 
@@ -163,7 +209,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Trigger */}
-          <div className="flex items-center gap-4 md:hidden">
+          <div className="flex items-center gap-4 xl:hidden">
             <Link to="/cart" className="relative p-3">
               <ShoppingCart size={22} />
               {totalItems > 0 && (
@@ -181,28 +227,39 @@ const Navbar = () => {
             </motion.button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
+      {/* Mobile Menu (Drawer) - Moved outside nav for global stacking context */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-md z-[90]"
+            />
+
             <motion.div
               initial={{ opacity: 0, x: "100%" }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
-              className="fixed inset-0 bg-white dark:bg-black z-[100] md:hidden flex flex-col pt-32 px-10"
+              className="fixed inset-y-0 right-0 w-full md:w-[450px] bg-white dark:bg-black z-[100] flex flex-col pt-24 px-10 shadow-[-20px_0_80px_rgba(0,0,0,0.3)] border-l-2 border-black dark:border-white"
             >
               {/* Internal Close Button */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="absolute top-10 right-10 p-4 bg-black/5 dark:bg-white/5 rounded-2xl border-2 border-black dark:border-white transition-all"
+                className="absolute top-10 right-10 p-4 bg-black/5 dark:bg-white/5 rounded-2xl border-2 border-black dark:border-white transition-all hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black z-[110]"
               >
                 <X size={24} />
               </motion.button>
 
-              <div className="flex flex-col gap-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.6em] opacity-30 mb-4">Navigation</p>
+              <div className="flex flex-col gap-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.6em] opacity-30 mb-2">Navigation</p>
                 {navLinks.map((link, index) => (
                   <motion.div
                     key={link.name}
@@ -213,9 +270,10 @@ const Navbar = () => {
                   >
                     <NavLink
                       to={link.path}
+                      end={link.end}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={({ isActive }) => 
-                        `text-4xl font-black uppercase tracking-tighter leading-none transition-all ${
+                        `text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none transition-all ${
                           isActive ? "opacity-100" : "opacity-30 hover:opacity-100"
                         }`
                       }
@@ -226,7 +284,7 @@ const Navbar = () => {
                 ))}
               </div>
               
-              <div className="mt-auto pb-16 space-y-12">
+              <div className="mt-auto pb-12 space-y-10">
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -235,65 +293,68 @@ const Navbar = () => {
                 />
                 
                 <div className="flex items-center justify-between">
-                  <div className="flex gap-6">
-                    <motion.button 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.7 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={toggleTheme} 
-                      className="p-5 border-2 border-black dark:border-white rounded-2xl flex items-center justify-center bg-black/5 dark:bg-white/5"
-                    >
-                      {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-                    </motion.button>
-                    {user && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 }}
-                        whileTap={{ scale: 0.95 }}
+                  {user ? (
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 border-2 border-black dark:border-white rounded-2xl bg-black/5 dark:bg-white/5">
+                        <User size={20} />
+                      </div>
+                      <div>
+                        <p className="text-[8px] font-black uppercase tracking-widest opacity-40">Account</p>
+                        <Link to="/account" onClick={() => setIsMobileMenuOpen(false)} className="text-[12px] font-bold block">{user.fullName}</Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-4">
+                      <motion.button 
+                        whileTap={{ scale: 0.9 }}
+                        onClick={toggleTheme} 
+                        className="p-5 border-2 border-black dark:border-white rounded-2xl flex items-center justify-center bg-black/5 dark:bg-white/5"
                       >
-                        <Link to="/account" onClick={() => setIsMobileMenuOpen(false)} className="p-5 border-2 border-black dark:border-white rounded-2xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-current">
-                          <User size={20} />
-                        </Link>
-                      </motion.div>
-                    )}
-                  </div>
+                        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                      </motion.button>
+                    </div>
+                  )}
 
-                  {!user && (
+                  {!user ? (
                     <motion.button
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.9 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => openAuthModal("login")}
                       className="btn-premium !py-5 !px-10"
                     >
                       Login
                     </motion.button>
+                  ) : (
+                    <motion.button
+                       whileTap={{ scale: 0.9 }}
+                       onClick={toggleTheme} 
+                       className="p-5 border-2 border-black dark:border-white rounded-2xl flex items-center justify-center bg-black/5 dark:bg-white/5"
+                    >
+                       {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                    </motion.button>
                   )}
                 </div>
 
                 {user ? (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Link
-                      to="/"
-                      className="btn-premium w-full text-center inline-block !py-5"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Start Shopping
-                    </Link>
-                  </motion.div>
+                  <div className="grid grid-cols-2 gap-4">
+                     <Link
+                        to="/account"
+                        className="btn-premium !bg-transparent text-black dark:text-white border-2 !py-5 flex items-center justify-center"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Settings
+                      </Link>
+                      <button
+                        className="btn-premium !bg-red-500 !border-red-500 text-white !py-5"
+                        onClick={() => {
+                          logoutUser();
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        Logout
+                      </button>
+                  </div>
                 ) : (
                   <motion.button
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => openAuthModal("signup")}
                     className="btn-premium w-full !py-5"
@@ -303,9 +364,9 @@ const Navbar = () => {
                 )}
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+          </>
+        )}
+      </AnimatePresence>
 
       <AuthModal
         isOpen={isAuthModalOpen}

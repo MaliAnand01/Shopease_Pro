@@ -12,9 +12,8 @@ export const AuthProvider = ({ children }) => {
   const [showOrderSuccess, setShowOrderSuccess] = useState(false);
   const [recentOrder, setRecentOrder] = useState(null);
 
-  // Enrich user profile from 'profiles' table (Background task)
+  // Enrich user profile from 'profiles' table
   const fetchProfile = async (sessionUser) => {
-    console.log("DB_FETCH: Enrichment attempt for", sessionUser.id);
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -23,14 +22,10 @@ export const AuthProvider = ({ children }) => {
         .single();
 
       if (error) {
-        if (error.code === "PGRST116") {
-          console.warn("DB_FETCH: Profile row not found. Using defaults.");
-          return;
-        }
+        if (error.code === "PGRST116") return;
         throw error;
       }
 
-      console.log("DB_FETCH: Success. Merging profile data.");
       setUser(prev => ({
         ...prev,
         fullName: data.full_name || prev.fullName,
@@ -40,15 +35,12 @@ export const AuthProvider = ({ children }) => {
         role: data.role || prev.role,
       }));
     } catch (error) {
-      console.error("DB_FETCH: Enrichment failed:", error.message);
+      // Silent error for background enrichment
     }
   };
 
   useEffect(() => {
-    console.log("AUTH: Initializing Supabase Auth listener...");
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(`AUTH_EVENT: [${event}]`, session?.user?.email || "No session");
       
       if (session?.user) {
         // 1. SET USER IMMEDIATELY from Auth Session
@@ -61,22 +53,16 @@ export const AuthProvider = ({ children }) => {
           shippingAddress: {}
         };
         
-        console.log("APP_STATE: Setting initial user from session metadata");
         setUser(initialUser);
-        
-        // 2. FETCH ENRICHMENT IN BACKGROUND (Don't await!)
         fetchProfile(session.user);
       } else {
-        console.log("APP_STATE: Clearing user object");
         setUser(null);
       }
       
       setLoading(false);
-      console.log("APP_STATE: Loading complete");
     });
 
     return () => {
-      console.log("AUTH: Cleaning up listener");
       subscription.unsubscribe();
     };
   }, []);
@@ -132,7 +118,6 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfilePic = async (imageUrl) => {
     try {
-      console.log("DB_SYNC: Updating profile picture...");
       const { error } = await supabase
         .from("profiles")
         .upsert({ 
@@ -146,15 +131,12 @@ export const AuthProvider = ({ children }) => {
       setUser(prev => ({ ...prev, profilePic: imageUrl }));
       toast.success("Profile picture updated!");
     } catch (error) {
-      console.error("DB_SYNC: Profile pic update failed:", error);
       toast.error("Failed to save profile picture");
     }
   };
 
   const updateUser = async (updates) => {
     try {
-      console.log("DB_SYNC: Updating user details...", updates);
-      
       const mappedUpdates = {
         id: user.id,
         full_name: updates.fullName || user.fullName,
@@ -169,8 +151,6 @@ export const AuthProvider = ({ children }) => {
 
       if (error) throw error;
 
-      console.log("DB_SYNC: Profile updated successfully in Supabase");
-
       setUser(prev => ({ 
         ...prev, 
         fullName: mappedUpdates.full_name,
@@ -180,7 +160,6 @@ export const AuthProvider = ({ children }) => {
       
       toast.success("Details updated successfully!");
     } catch (error) {
-      console.error("DB_SYNC: Profile update failed:", error);
       toast.error(error.message);
     }
   };
@@ -231,7 +210,6 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error("ADMIN_ERROR: Fetch all orders failed:", error);
       toast.error("Failed to load global orders", { id: "fetch-orders-error" });
       return [];
     }
@@ -287,7 +265,6 @@ export const AuthProvider = ({ children }) => {
         newOrders
       };
     } catch (error) {
-      console.error("ADMIN_ERROR: Stats fetch failed:", error);
       return { totalRevenue: 0, userCount: 0, newOrders: 0 };
     }
   };
