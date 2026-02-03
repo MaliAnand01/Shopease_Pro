@@ -14,6 +14,7 @@ const Account = lazy(() => import("./pages/Account"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ManageOrders = lazy(() => import("./pages/ManageOrders"));
+const ManageProducts = lazy(() => import("./pages/admin/ManageProducts"));
 const ErrorScreen = lazy(() => import("./components/ErrorScreen"));
 
 const App = () => {
@@ -37,6 +38,14 @@ const App = () => {
             element={
               <ProtectedRoute adminOnly>
                 <ManageOrders />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="admin/products" 
+            element={
+              <ProtectedRoute adminOnly>
+                <ManageProducts />
               </ProtectedRoute>
             } 
           />

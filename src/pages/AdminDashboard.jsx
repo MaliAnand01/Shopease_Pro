@@ -1,9 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
 import { AuthContext } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import { motion } from "framer-motion";
-import { BarChart3, Users, ShoppingBag, ArrowUpRight } from "lucide-react";
+import { BarChart3, Users, ShoppingBag, ArrowUpRight, Package } from "lucide-react";
 
 const AdminDashboard = () => {
   const { theme } = useContext(ThemeContext);
@@ -37,6 +38,7 @@ const AdminDashboard = () => {
     { label: "Total Revenue", value: `$${dashboardStats.totalRevenue}`, icon: BarChart3, trend: "+12%" },
     { label: "System Users", value: dashboardStats.userCount, icon: Users, trend: "+5%" },
     { label: "Pending Fulfillment", value: dashboardStats.newOrders, icon: ShoppingBag, trend: "+18%" },
+    { label: "Inventory Items", value: "88", icon: Package, trend: "Manage", link: "/admin/products" },
   ];
 
   if (loading) {
@@ -66,12 +68,16 @@ const AdminDashboard = () => {
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {stats.map((stat, idx) => (
-            <motion.div 
+            <Link 
+              to={stat.link || "#"}
               key={idx} 
+              className={stat.link === "/admin/products" ? "hidden md:block" : ""}
+            >
+            <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: idx * 0.1 }}
-              className="p-6 md:p-10 border-2 border-black dark:border-white rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-black"
+              className="p-6 md:p-10 border-2 border-black dark:border-white rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-black h-full hover:scale-105 transition-transform duration-500"
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="p-4 rounded-2xl border-2 border-black dark:border-white">
@@ -84,6 +90,7 @@ const AdminDashboard = () => {
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 mb-2">{stat.label}</p>
               <h2 className="text-3xl md:text-4xl font-black tracking-tighter">{stat.value}</h2>
             </motion.div>
+            </Link>
           ))}
         </div>
 

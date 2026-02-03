@@ -12,8 +12,21 @@ const Home = () => {
   const { theme } = useContext(ThemeContext);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
-  const categories = ["all", "beauty", "fragrances", "furniture", "groceries"];
+  // Group definitions
+  const categoryGroups = {
+    electronics: ['smartphones', 'laptops', 'tablets', 'mobile-accessories'],
+    fashion: ['mens-shirts', 'mens-shoes', 'womens-dresses', 'womens-shoes', 'womens-bags', 'tops', 'sunglasses'],
+    watches: ['mens-watches', 'womens-watches'],
+    beauty: ['fragrances', 'skin-care'],
+  };
+
+  // Main pill categories (High level)
+  const mainCategories = ["all", "electronics", "fashion", "watches", "beauty"];
+  
+  // Get all unique categories from products for the "View More" section
+  const allGranularCategories = [...new Set(state.products.map(p => p.category))];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -24,10 +37,18 @@ const Home = () => {
 
   const handleSearch = (e) => setQuery(e.target.value);
 
-  // Filter products by category locally for smoother UI (dummyjson does it via API too, but local is faster for simple taps)
-  const filteredProducts = activeCategory === "all" 
-    ? state.products 
-    : state.products.filter(p => p.category === activeCategory);
+  // Advanced Filtering Logic
+  const filteredProducts = state.products.filter(p => {
+    if (activeCategory === "all") return true;
+
+    // Check if activeCategory is a group
+    if (categoryGroups[activeCategory]) {
+      return categoryGroups[activeCategory].includes(p.category);
+    }
+    
+    // Otherwise check for exact match (if user selected a granular category)
+    return p.category === activeCategory;
+  });
 
   return (
     <div className="pb-20">
@@ -53,34 +74,73 @@ const Home = () => {
           {/* Controls */}
           <div className="flex flex-col gap-10 flex-1 lg:max-w-4xl">
             {/* Search */}
-            <div className="relative w-full group">
-              <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-black dark:text-white transition-opacity opacity-40 group-focus-within:opacity-100" size={18} />
+            <div className={`w-full relative group border-b-2 transition-all ${theme === 'dark' ? 'border-white focus-within:border-white' : 'border-black focus-within:border-black'}`}>
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 pl-0">
+                 <Search className="text-black dark:text-white transition-opacity opacity-40 group-focus-within:opacity-100" size={18} />
+              </div>
               <input
                 type="text"
                 value={query}
                 onChange={handleSearch}
                 placeholder="Search products..."
-                className={`w-full bg-transparent border-b-2 py-6 pl-10 pr-4 outline-none transition-all text-sm font-bold uppercase tracking-[0.2em] text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/30 ${
-                  theme === 'dark' ? 'border-white focus:border-white' : 'border-black focus:border-black'
-                }`}
+                className="w-full bg-transparent py-4 pl-10 pr-4 outline-none text-sm font-bold uppercase tracking-[0.2em] text-black dark:text-white placeholder:text-black/30 dark:placeholder:text-white/30"
               />
             </div>
 
             {/* Category Pills */}
-            <div className="flex flex-wrap gap-4 scrollbar-hide">
-              {categories.map((cat) => (
+            <div className="flex flex-col gap-4">
+              {/* Main Categories */}
+              <div className="flex flex-wrap gap-4 scrollbar-hide">
+                {mainCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => { setActiveCategory(cat); setShowAllCategories(false); }}
+                    className={`px-6 py-3 sm:px-10 sm:py-4 text-[10px] font-black uppercase tracking-[0.3em] whitespace-nowrap transition-all rounded-full border-2 ${
+                      activeCategory === cat
+                        ? "bg-white scale-95 text-black border-black dark:bg-black dark:text-white dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]"
+                        : "border-black dark:border-white opacity-40 hover:opacity-100"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+                
+                {/* View More Button */}
                 <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-6 py-3 sm:px-10 sm:py-4 text-[10px] font-black uppercase tracking-[0.3em] whitespace-nowrap transition-all rounded-full border-2 ${
-                    activeCategory === cat
-                      ? "bg-white scale-95 text-black border-black dark:bg-black dark:text-white dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]"
-                      : "border-black dark:border-white opacity-40 hover:opacity-100"
-                  }`}
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                  className={`px-6 py-3 sm:px-10 sm:py-4 text-[10px] font-black uppercase tracking-[0.3em] whitespace-nowrap transition-all rounded-full border-2 border-black dark:border-white ${showAllCategories ? 'bg-black text-white dark:bg-white dark:text-black' : 'opacity-40 hover:opacity-100'}`}
                 >
-                  {cat}
+                  {showAllCategories ? "Hide Filters" : "View All"}
                 </button>
-              ))}
+              </div>
+
+              {/* Granular Categories (Collapsible) */}
+              <AnimatePresence>
+                {showAllCategories && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="flex flex-wrap gap-3 pt-4">
+                      {allGranularCategories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setActiveCategory(cat)}
+                          className={`px-4 py-2 text-[9px] font-bold uppercase tracking-widest rounded-lg border ${
+                            activeCategory === cat
+                              ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
+                              : "border-black/20 dark:border-white/20 hover:border-black dark:hover:border-white"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

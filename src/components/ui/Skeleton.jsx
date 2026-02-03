@@ -1,11 +1,23 @@
-import React from "react";
+import { motion } from "framer-motion";
 
 const Skeleton = ({ className, ...props }) => {
   return (
     <div
-      className={`animate-pulse bg-black/5 dark:bg-white/10 rounded-xl ${className}`}
+      className={`relative overflow-hidden bg-black/5 dark:bg-white/5 rounded-xl ${className}`}
       {...props}
-    />
+    >
+      <motion.div
+        animate={{
+          x: ["-100%", "100%"],
+        }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 dark:via-white/10 to-transparent w-1/2"
+      />
+    </div>
   );
 };
 
