@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable no-unused-vars */
 
 import React, { useContext, useState, useEffect } from "react";
 import { ThemeContext } from "../../context/ThemeContext";

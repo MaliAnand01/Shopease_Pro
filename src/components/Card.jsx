@@ -1,8 +1,9 @@
 import React, { memo, useContext } from "react";
-import { Star, ShoppingCart, ArrowRight } from "lucide-react";
+import { Star, ShoppingCart, ArrowRight, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ThemeContext } from "../context/ThemeContext";
+import { WishlistContext } from "../context/WishlistContext";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import LazyImage from "./ui/LazyImage";
@@ -18,6 +19,7 @@ const Card = ({
   product,
 }) => {
   const { addItem } = useContext(CartContext);
+  const { toggleWishlist, isInWishlist } = useContext(WishlistContext);
   const { theme } = useContext(ThemeContext);
 
   const handleAddToCart = (e) => {
@@ -30,6 +32,14 @@ const Card = ({
       addItem({ id: pId, title, price, thumbnail: image, brand }, 1);
     }
     toast.success("Added to cart");
+  };
+
+  const isWishlisted = isInWishlist(pId);
+
+  const handleWishlistToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(pId);
   };
 
   return (
@@ -57,6 +67,20 @@ const Card = ({
             {tag1}
           </div>
         )}
+
+        {/* Wishlist Button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleWishlistToggle}
+          className={`absolute top-6 right-6 p-3 rounded-full border-2 transition-all ${
+            isWishlisted 
+              ? "bg-red-500 border-red-500 text-white" 
+              : "bg-white/80 dark:bg-black/80 border-black dark:border-white text-black dark:text-white backdrop-blur-md"
+          }`}
+        >
+          <Heart size={16} className={isWishlisted ? "fill-current" : ""} />
+        </motion.button>
       </Link>
 
       {/* Info */}

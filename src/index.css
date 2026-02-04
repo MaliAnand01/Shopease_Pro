@@ -103,4 +103,19 @@
   .premium-shadow {
     @apply shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)];
   }
+
+  /* Custom Dual-Thumb Range Slider */
+  .custom-slider::-webkit-slider-thumb {
+    @apply appearance-none w-6 h-6 bg-black dark:bg-white border-2 border-white dark:border-black rounded-none cursor-pointer pointer-events-auto transition-all active:scale-90 active:rotate-12;
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+  }
+  
+  .dark .custom-slider::-webkit-slider-thumb {
+    box-shadow: 4px 4px 0px 0px rgba(255,255,255,1);
+  }
+
+  .custom-slider::-moz-range-thumb {
+    @apply w-6 h-6 bg-black dark:bg-white border-2 border-white dark:border-black rounded-none cursor-pointer pointer-events-auto transition-all active:scale-90;
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+  }
 }
