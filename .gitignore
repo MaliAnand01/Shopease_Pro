@@ -13,7 +13,6 @@ dist-ssr
 .ultra
 .next
 .vercel
-vercel.json
 
 # Agent & Workspace Metadata
 .gemini
