@@ -1,10 +1,11 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Menu, X, ShoppingCart, Sun, Moon, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, ShoppingCart, Sun, Moon, User, LogOut, Settings, Heart } from "lucide-react";
 import logo from "../assets/logo.png";
 import { CartContext } from "../context/CartContext";
 import { ThemeContext } from "../context/ThemeContext";
 import { AuthContext } from "../context/AuthContext";
+import { WishlistContext } from "../context/WishlistContext";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import AuthModal from "./AuthModal";
 
@@ -71,6 +72,7 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
 
   const { totalItems } = useContext(CartContext);
+  const { wishlistProductIds } = useContext(WishlistContext);
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { user, logoutUser } = useContext(AuthContext);
 
@@ -150,6 +152,18 @@ const Navbar = () => {
               </button>
 
               <Link 
+                to="/wishlist" 
+                className="relative p-2 border border-black dark:border-white rounded-full hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-500 active:scale-90"
+              >
+                <Heart size={14} className={wishlistProductIds.length > 0 ? "fill-current" : ""} />
+                {wishlistProductIds.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-black dark:bg-white text-white dark:text-black text-[8px] font-black rounded-full h-4 w-4 flex items-center justify-center border border-white dark:border-black">
+                    {wishlistProductIds.length}
+                  </span>
+                )}
+              </Link>
+
+              <Link 
                 to="/cart" 
                 className="relative p-2 border border-black dark:border-white rounded-full hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-500 active:scale-90"
               >
@@ -210,6 +224,14 @@ const Navbar = () => {
 
           {/* Mobile Menu Trigger */}
           <div className="flex items-center gap-4 xl:hidden">
+            <Link to="/wishlist" className="relative p-3">
+              <Heart size={22} className={wishlistProductIds.length > 0 ? "fill-current" : ""} />
+              {wishlistProductIds.length > 0 && (
+                <span className="absolute top-1 right-1 bg-black dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                  {wishlistProductIds.length}
+                </span>
+              )}
+            </Link>
             <Link to="/cart" className="relative p-3">
               <ShoppingCart size={22} />
               {totalItems > 0 && (

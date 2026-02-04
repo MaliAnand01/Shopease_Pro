@@ -16,6 +16,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ManageOrders = lazy(() => import("./pages/ManageOrders"));
 const ManageProducts = lazy(() => import("./pages/admin/ManageProducts"));
 const ErrorScreen = lazy(() => import("./components/ErrorScreen"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
 
 const App = () => {
   return (
@@ -51,6 +52,7 @@ const App = () => {
           />
           <Route path="product/:id" element={<Product />} />
           <Route path="cart" element={<Cart />} />
+          <Route path="wishlist" element={<Wishlist />} />
 
           <Route path="*" element={<ErrorScreen message="Page not found" />} />
           <Route

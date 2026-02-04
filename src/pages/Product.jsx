@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Star, ShoppingCart, ShieldCheck, Truck, RefreshCw } from "lucide-react";
+import { ChevronLeft, Star, ShoppingCart, ShieldCheck, Truck, RefreshCw, Heart } from "lucide-react";
 import { CartContext } from "../context/CartContext";
 import { ThemeContext } from "../context/ThemeContext";
 import { ProductContext } from "../context/ProductContext";
 import { AuthContext } from "../context/AuthContext";
+import { WishlistContext } from "../context/WishlistContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import Skeleton from "../components/ui/Skeleton";
 import LazyImage from "../components/ui/LazyImage";
+import SEO from "../components/SEO";
 
 const Product = () => {
   const [product, setProduct] = useState({});
@@ -17,6 +19,7 @@ const Product = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useContext(CartContext);
+  const { toggleWishlist, isInWishlist } = useContext(WishlistContext);
   const { theme } = useContext(ThemeContext);
   const { state } = useContext(ProductContext);
 
@@ -55,6 +58,11 @@ const Product = () => {
 
   return (
     <div className={`min-h-screen pt-0 pb-32 ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}`}>
+      <SEO
+        title={product.title}
+        description={product.description || `Buy ${product.title} - Premium Quality`}
+        image={product.images?.[0] || product.thumbnail}
+      />
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Back Button */}
@@ -144,13 +152,24 @@ const Product = () => {
             <div className="flex flex-col sm:flex-row gap-6 mb-20">
               <button
                 onClick={handleAddToCart}
-                className="btn-premium flex-1 !py-6"
+                className="btn-premium flex-[2] !py-6"
               >
                 Add to Bag
               </button>
               <button
+                onClick={() => toggleWishlist(product.id)}
+                className={`btn-premium flex-1 !py-6 flex items-center justify-center gap-3 transition-colors ${
+                  isInWishlist(product.id)
+                    ? "bg-red-500 border-red-500 text-white"
+                    : "!bg-transparent !text-current border-2 border-black dark:border-white"
+                }`}
+              >
+                <Heart size={20} className={isInWishlist(product.id) ? "fill-current" : ""} />
+                {isInWishlist(product.id) ? "Saved" : "Save"}
+              </button>
+              <button
                 onClick={handleBuyNow}
-                className="btn-premium flex-1 !py-6 !bg-transparent !text-current transition-colors border-2 border-black dark:border-white hover:!bg-black dark:hover:!bg-white hover:!text-white dark:hover:!text-black"
+                className="btn-premium flex-[2] !py-6 !bg-transparent !text-current transition-colors border-2 border-black dark:border-white hover:!bg-black dark:hover:!bg-white hover:!text-white dark:hover:!text-black"
               >
                 Instant Selection
               </button>

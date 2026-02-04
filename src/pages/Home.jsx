@@ -2,10 +2,11 @@ import React, { useContext, useState, useEffect } from "react";
 import { ProductContext } from "../context/ProductContext";
 import Card from "../components/Card";
 import Hero from "../components/Hero";
-import { Search, Filter, TrendingUp, Sparkles } from "lucide-react";
+import { Search, TrendingUp, Sparkles } from "lucide-react";
 import { ThemeContext } from "../context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Skeleton from "../components/ui/Skeleton";
+import SEO from "../components/SEO";
 
 const Home = () => {
   const { state, dispatch } = useContext(ProductContext);
@@ -52,6 +53,10 @@ const Home = () => {
 
   return (
     <div className="pb-20">
+      <SEO 
+        title="Home" 
+        description="Discover our curated collection of premium artifacts."
+      />
       <Hero />
 
       {/* Categories & Search Header */}

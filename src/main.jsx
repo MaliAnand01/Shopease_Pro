@@ -7,8 +7,9 @@ import ThemeProvider from "./context/ThemeProvider";
 import CartProvider from "./context/CartProvider";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "react-hot-toast";
+import { WishlistProvider } from "./context/WishlistProvider";
 import { ProductProvider } from "./context/ProductContext";
-import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -16,14 +17,16 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <ThemeProvider>
           <ProductProvider>
-            <CartProvider>
-              <BrowserRouter>
-              <ErrorBoundary>
-                <App />
-              </ErrorBoundary>
-                <Toaster />
-              </BrowserRouter>
-            </CartProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <BrowserRouter>
+                <ErrorBoundary>
+                  <App />
+                </ErrorBoundary>
+                  <Toaster />
+                </BrowserRouter>
+              </CartProvider>
+            </WishlistProvider>
           </ProductProvider>
         </ThemeProvider>
       </AuthProvider>
